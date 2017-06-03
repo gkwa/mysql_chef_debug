@@ -1,8 +1,30 @@
-kitchen destroy all >/dev/null
-kitchen create smoke57-ubuntu-1604
-
+rm -rf mysql-taylor
+git clone --depth=50 https://github.com/taylormonacelli/mysql.git mysql-taylor
 cd mysql-taylor
 rm -rf out1
 berks package chef-mysql-taylor-cookbook.tgz
 aws s3 cp chef-mysql-taylor-cookbook.tgz s3://taylors-bucket --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-kitchen login smoke57-ubuntu-1604
+
+uname -a
+eval "$(chef shell-init bash)";
+export KITCHEN_YAML=.kitchen.yml
+export KITCHEN_LOCAL_YAML=.kitchen.dokken.yml
+export INSTANCE=smoke57-ubuntu-1604
+rvm use default
+export BUNDLE_GEMFILE=$PWD/Gemfile
+git rev-parse --short HEAD
+docker version
+rvm --version
+ruby --version
+bundle --version
+gem --version
+echo "skip bundle install"
+sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+eval "$(/opt/chefdk/bin/chef shell-init bash)"
+/opt/chefdk/embedded/bin/chef --version
+/opt/chefdk/embedded/bin/cookstyle --version
+/opt/chefdk/embedded/bin/foodcritic --version
+kitchen destroy all >/dev/null
+kitchen create ${INSTANCE}
+aws s3 cp ../chef-cookbooks-mysql-runner.sh s3://taylors-bucket --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+/opt/chefdk/embedded/bin/kitchen exec ${INSTANCE} bash -c 'apt -qy install curl; curl -LO https://s3-us-west-2.amazonaws.com/taylors-bucket/chef-cookbooks-mysql-runner.sh; bash chef-cookbooks-mysql-runner.sh'
