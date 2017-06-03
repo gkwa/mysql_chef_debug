@@ -1,0 +1,5 @@
+eval "$(chef shell-init bash)";
+gist --version >/dev/null || gem install gist
+rm -f typescript
+script -c 'time bash -x run2 2>&1 | ts -i | ts "%T"'
+gist --description 'debug mysql chef cookbook in conainer' run1 run2 typescript
