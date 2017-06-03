@@ -1,0 +1,8 @@
+kitchen destroy all >/dev/null
+kitchen create smoke57-ubuntu-1604
+
+cd mysql-taylor
+rm -rf out1
+berks package chef-mysql-taylor-cookbook.tgz
+aws s3 cp chef-mysql-taylor-cookbook.tgz s3://taylors-bucket --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+kitchen login smoke57-ubuntu-1604
