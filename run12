@@ -1,5 +1,5 @@
-rm -rf mysql-taylor
-git clone --depth=50 https://github.com/taylormonacelli/mysql.git mysql-taylor
+[ ! -d mysql-taylor ] &&
+    git clone --depth=50 https://github.com/taylormonacelli/mysql.git mysql-taylor
 cd mysql-taylor
 
 uname -a
