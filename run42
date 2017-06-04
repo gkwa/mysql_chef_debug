@@ -1,0 +1,54 @@
+apt -qqy update
+apt -qqy install git
+
+# FIXME: manually cut/paste into container unless I can find way to run
+# this inside container:
+
+# culled from https://travis-ci.org/chef-cookbooks/mysql/jobs/237803281
+# addons.apt.sources addons.apt.packages
+echo "deb https://packages.chef.io/stable-apt trusty main" | tee -a /etc/apt/sources.list > /dev/null
+export DEBIAN_FRONTEND=noninteractive
+apt-get install apt-transport-https lsb-release procps net-tools -y </dev/null
+
+apt-get -qqy install curl </dev/null
+
+# https://github.com/chef-cookbooks/mysql/blob/105beefbe74d5c7d6753fe16aef50dc0b0c4945d/.kitchen.dokken.yml#L72
+curl -sSL "https://downloads.chef.io/packages-chef-io-public.key" | apt-key add -
+
+# FIXME: I'm stripping out sudo here because i'm in container
+# How does travis run this...its got sudo...is travis running this in container or full instance?
+apt-get -qqy update </dev/null &>> ~/apt-get-update.log
+
+apt-get -qqy --no-install-suggests --no-install-recommends --force-yes install chefdk </dev/null
+
+# install docker
+apt -qqy update
+apt -qqy install curl
+curl -fsSL https://get.docker.com/ | sh
+
+[ ! -d mysql-taylor ] &&
+    git clone --depth=50 https://github.com/taylormonacelli/mysql.git /tmp/mysql-taylor
+
+cd /tmp/mysql-taylor
+
+uname -a
+eval "$(chef shell-init bash)";
+export KITCHEN_YAML=.kitchen.yml
+export KITCHEN_LOCAL_YAML=.kitchen.dokken.yml
+export INSTANCE=smoke57-ubuntu-1604
+rvm use default
+export BUNDLE_GEMFILE=$PWD/Gemfile
+git rev-parse --short HEAD
+docker version
+rvm --version
+ruby --version
+bundle --version
+gem --version
+echo "skip bundle install"
+sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+eval "$(/opt/chefdk/bin/chef shell-init bash)"
+/opt/chefdk/embedded/bin/chef --version
+/opt/chefdk/embedded/bin/cookstyle --version
+/opt/chefdk/embedded/bin/foodcritic --version
+kitchen destroy all >/dev/null
+/opt/chefdk/embedded/bin/kitchen verify ${INSTANCE}
