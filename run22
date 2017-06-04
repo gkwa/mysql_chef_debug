@@ -26,5 +26,5 @@ eval "$(/opt/chefdk/bin/chef shell-init bash)"
 /opt/chefdk/embedded/bin/foodcritic --version
 kitchen destroy all >/dev/null
 kitchen create ${INSTANCE}
-aws s3 cp ../chef-cookbooks-mysql-runner.sh s3://taylors-bucket --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-/opt/chefdk/embedded/bin/kitchen exec ${INSTANCE} bash -c 'bash -c "apt -qy install curl; curl -LO https://s3-us-west-2.amazonaws.com/taylors-bucket/chef-cookbooks-mysql-runner.sh; bash chef-cookbooks-mysql-runner.sh"'
+aws s3 cp ../run21-chef-cookbooks-mysql-runner.sh s3://taylors-bucket --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+/opt/chefdk/embedded/bin/kitchen exec ${INSTANCE} bash -c 'bash -c "apt -qy install curl; curl -LO https://s3-us-west-2.amazonaws.com/taylors-bucket/run21-chef-cookbooks-mysql-runner.sh; bash run21-chef-cookbooks-mysql-runner.sh"'
